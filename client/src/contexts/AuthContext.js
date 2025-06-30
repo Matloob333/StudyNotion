@@ -64,9 +64,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Login user
-  const login = async (credentials) => {
+  const login = async (email, password) => {
     try {
-      const res = await axios.post('/api/auth/login', credentials);
+      const res = await axios.post('/api/auth/login', { email, password });
       const { token: newToken, user: newUser } = res.data;
       
       localStorage.setItem('token', newToken);
@@ -137,6 +137,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Forgot password
+  const forgotPassword = async (email) => {
+    try {
+      const res = await axios.post('/api/auth/forgot-password', { email });
+      toast.success('Password reset email sent! Check your inbox.');
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to send reset email';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
+  // Reset password
+  const resetPassword = async (token, password) => {
+    try {
+      const res = await axios.post('/api/auth/reset-password', { token, password });
+      toast.success('Password reset successfully! You can now login with your new password.');
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to reset password';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -147,6 +173,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     updateProfilePicture,
+    forgotPassword,
+    resetPassword,
     isAuthenticated: !!user,
     isInstructor: user?.accountType === 'Instructor' || user?.accountType === 'Admin',
     isAdmin: user?.accountType === 'Admin'

@@ -58,6 +58,12 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  resetToken: {
+    type: String
+  },
+  resetTokenExpiry: {
+    type: Date
+  },
   courses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'

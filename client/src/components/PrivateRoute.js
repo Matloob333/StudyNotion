@@ -2,8 +2,8 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const PrivateRoute = ({ children, instructorOnly = false }) => {
-  const { user, loading, isInstructor } = useAuth();
+const PrivateRoute = ({ children, instructorOnly = false, adminOnly = false }) => {
+  const { user, loading, isInstructor, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -17,7 +17,11 @@ const PrivateRoute = ({ children, instructorOnly = false }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (instructorOnly && !isInstructor) {
+  if (adminOnly && !isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (instructorOnly && !isInstructor && !isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -71,18 +71,22 @@ mongoose.connect(MONGODB_URI, {
   console.log('- Category model:', typeof Category.find);
   
   // Load routes only after successful connection
+  app.use('/api/health', require('./routes/health'));
   app.use('/api/auth', require('./routes/auth'));
   app.use('/api/courses', require('./routes/courses'));
   app.use('/api/users', require('./routes/users'));
   app.use('/api/categories', require('./routes/categories'));
+  app.use('/api/admin', require('./routes/admin'));
 })
 .catch(err => console.log('MongoDB Connection Error:', err));
 
-// Serve static assets if in production
+// Serve static files from the React app build directory
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'));
+  app.use(express.static(path.join(__dirname, 'client/build')));
+  
+  // Handle React routing, return all requests to React app
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
   });
 }
 

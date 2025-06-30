@@ -141,15 +141,29 @@ router.post('/', [
       return res.status(400).json({ errors: errors.array() });
     }
     
+    // Check if user is instructor or admin
+    const user = await User.findById(req.user.id);
+    if (user.accountType !== 'Instructor' && user.accountType !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Instructor or Admin only.' });
+    }
+    
     const courseData = {
       ...req.body,
-      instructor: req.user.id
+      instructor: req.user.id,
+      // Set approval status based on user type
+      approvalStatus: user.accountType === 'Admin' ? 'Approved' : 'Pending',
+      isPublished: user.accountType === 'Admin' // Only admin can publish directly
     };
     
     const course = new Course(courseData);
     await course.save();
     
-    res.status(201).json(course);
+    res.status(201).json({
+      ...course.toObject(),
+      message: user.accountType === 'Admin' 
+        ? 'Course created and published successfully' 
+        : 'Course created successfully and sent for approval'
+    });
   } catch (error) {
     console.error('Error creating course:', error);
     res.status(500).json({ message: 'Server error' });
@@ -455,6 +469,32 @@ router.get('/:id/enrollment-status', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('Error checking enrollment status:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   GET /api/courses/my-courses
+// @desc    Get instructor's courses
+// @access  Private (Instructor/Admin only)
+router.get('/my-courses', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if user is instructor or admin
+    if (user.accountType !== 'Instructor' && user.accountType !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Instructor or Admin only.' });
+    }
+
+    const courses = await Course.find({ instructor: req.user.id })
+      .populate('category', 'name')
+      .sort({ createdAt: -1 });
+
+    res.json(courses);
+  } catch (error) {
+    console.error('Error fetching instructor courses:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

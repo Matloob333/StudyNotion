@@ -1,146 +1,118 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Play, 
-  Star, 
-  Users, 
-  BookOpen, 
-  ArrowRight, 
-  TrendingUp, 
-  Award, 
-  Globe, 
-  Zap 
-} from 'lucide-react';
+import { useQuery } from 'react-query';
+import { BookOpen, Users, Award, Play, ArrowRight, Star, Heart } from 'lucide-react';
+import axios from 'axios';
 import CourseCard from '../components/CourseCard';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Home = () => {
-  const featuredCourses = [
-    {
-      id: 1,
-      title: "Complete Web Development Bootcamp",
-      instructor: "John Doe",
-      rating: 4.8,
-      students: 15420,
-      price: 999,
-      originalPrice: 1499,
-      thumbnail: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=250&fit=crop",
-      category: "Web Development"
-    },
-    {
-      id: 2,
-      title: "React.js Masterclass 2024",
-      instructor: "Jane Smith",
-      rating: 4.9,
-      students: 8920,
-      price: 799,
-      originalPrice: 1299,
-      thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=250&fit=crop",
-      category: "React"
-    },
-    {
-      id: 3,
-      title: "Python for Data Science",
-      instructor: "Mike Johnson",
-      rating: 4.7,
-      students: 12340,
-      price: 899,
-      originalPrice: 1399,
-      thumbnail: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=400&h=250&fit=crop",
-      category: "Data Science"
-    },
-    {
-      id: 4,
-      title: "UI/UX Design Fundamentals",
-      instructor: "Sarah Wilson",
-      rating: 4.6,
-      students: 6780,
-      price: 699,
-      originalPrice: 1199,
-      thumbnail: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=250&fit=crop",
-      category: "Design"
+  const { isDark } = useTheme();
+  const { user } = useAuth();
+  const [activeCategory, setActiveCategory] = useState('all');
+
+  // Fetch featured courses
+  const { data: featuredCourses = [] } = useQuery(
+    ['featured-courses'],
+    async () => {
+      const response = await axios.get('/api/courses/featured?limit=6');
+      return response.data;
     }
-  ];
+  );
+
+  // Fetch popular courses
+  const { data: popularCourses = [] } = useQuery(
+    ['popular-courses'],
+    async () => {
+      const response = await axios.get('/api/courses/popular?limit=8');
+      return response.data;
+    }
+  );
 
   const categories = [
-    { name: "Web Development", icon: <Globe className="w-6 h-6" />, color: "bg-blue-500" },
-    { name: "Mobile Development", icon: <Zap className="w-6 h-6" />, color: "bg-green-500" },
-    { name: "Data Science", icon: <TrendingUp className="w-6 h-6" />, color: "bg-purple-500" },
-    { name: "Design", icon: <Award className="w-6 h-6" />, color: "bg-pink-500" }
+    { id: 'all', name: 'All Categories', icon: '📚' },
+    { id: 'web-development', name: 'Web Development', icon: '🌐' },
+    { id: 'mobile-development', name: 'Mobile Development', icon: '📱' },
+    { id: 'data-science', name: 'Data Science', icon: '📊' },
+    { id: 'design', name: 'Design', icon: '🎨' },
+    { id: 'business', name: 'Business', icon: '💼' },
+    { id: 'marketing', name: 'Marketing', icon: '📈' }
   ];
 
   const stats = [
-    { number: "50K+", label: "Students Enrolled", icon: <Users className="w-8 h-8" /> },
-    { number: "200+", label: "Expert Instructors", icon: <Award className="w-8 h-8" /> },
-    { number: "500+", label: "Online Courses", icon: <BookOpen className="w-8 h-8" /> },
-    { number: "95%", label: "Success Rate", icon: <Star className="w-8 h-8" /> }
+    {
+      icon: <Users className="w-6 h-6" />,
+      value: '50,000+',
+      label: 'Students Enrolled',
+      color: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      icon: <BookOpen className="w-6 h-6" />,
+      value: '500+',
+      label: 'Courses Available',
+      color: 'text-green-600 dark:text-green-400'
+    },
+    {
+      icon: <Award className="w-6 h-6" />,
+      value: '100+',
+      label: 'Expert Instructors',
+      color: 'text-purple-600 dark:text-purple-400'
+    },
+    {
+      icon: <Star className="w-6 h-6" />,
+      value: '4.8',
+      label: 'Average Rating',
+      color: 'text-yellow-600 dark:text-yellow-400'
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-600 via-primary-700 to-accent-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                Learn Without
-                <span className="block text-accent-400">Limits</span>
-              </h1>
-              <p className="text-xl mb-8 text-primary-100">
-                Start, switch, or advance your career with thousands of courses from expert instructors.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/courses"
-                  className="bg-white text-primary-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-center"
-                >
-                  Explore Courses
-                </Link>
+      <section className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white">
+        <div className="absolute inset-0 bg-black opacity-20"></div>
+        <div className="relative container mx-auto px-4 py-20">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              Learn Without
+              <span className="text-yellow-300"> Limits</span>
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 text-blue-100">
+              Access world-class education from anywhere. Transform your career with our comprehensive online courses.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/courses"
+                className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                <BookOpen className="w-5 h-5" />
+                Explore Courses
+              </Link>
+              {!user && (
                 <Link
                   to="/register"
-                  className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition-colors text-center"
+                  className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-600 transition-colors duration-200"
                 >
-                  Join for Free
+                  Get Started Free
                 </Link>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/20 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold mb-2">50K+</div>
-                    <div className="text-sm">Students</div>
-                  </div>
-                  <div className="bg-white/20 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold mb-2">200+</div>
-                    <div className="text-sm">Instructors</div>
-                  </div>
-                  <div className="bg-white/20 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold mb-2">500+</div>
-                    <div className="text-sm">Courses</div>
-                  </div>
-                  <div className="bg-white/20 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold mb-2">95%</div>
-                    <div className="text-sm">Success Rate</div>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white dark:bg-dark-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="flex justify-center mb-4 text-primary-600 dark:text-primary-400">
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4 ${stat.color}`}>
                   {stat.icon}
                 </div>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  {stat.number}
+                  {stat.value}
                 </div>
                 <div className="text-gray-600 dark:text-gray-400">
                   {stat.label}
@@ -151,81 +123,128 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Courses */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                Featured Courses
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                Discover the most popular courses chosen by our students
-              </p>
-            </div>
-            <Link
-              to="/courses"
-              className="flex items-center space-x-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
-            >
-              <span>View All Courses</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+      {/* Categories Section */}
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Explore by Category
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              Find the perfect course in your field of interest
+            </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setActiveCategory(category.id)}
+                className={`p-6 rounded-xl border transition-all duration-200 ${
+                  activeCategory === category.id
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : isDark
+                    ? 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <div className="text-3xl mb-3">{category.icon}</div>
+                <div className={`text-sm font-medium ${
+                  activeCategory === category.id
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}>
+                  {category.name}
+                </div>
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="py-16 bg-white dark:bg-dark-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Explore by Category
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Choose from our wide range of categories
-            </p>
+      {/* Featured Courses Section */}
+      <section className="py-16 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Featured Courses
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                Handpicked courses from our top instructors
+              </p>
+            </div>
+            <Link
+              to="/courses"
+              className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+            >
+              View all courses
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {categories.map((category, index) => (
-              <Link
-                key={index}
-                to={`/courses?category=${category.name}`}
-                className="group bg-gray-50 dark:bg-dark-700 rounded-lg p-6 text-center hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
-              >
-                <div className={`${category.color} text-white rounded-lg p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                  {category.icon}
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                  {category.name}
-                </h3>
-              </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredCourses.map((course) => (
+              <CourseCard key={course._id} course={course} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Courses Section */}
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Most Popular Courses
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                Join thousands of students learning these courses
+              </p>
+            </div>
+            <Link
+              to="/courses"
+              className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+            >
+              View all courses
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {popularCourses.map((course) => (
+              <CourseCard key={course._id} course={course} />
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-primary-600 to-accent-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">
             Ready to Start Learning?
           </h2>
-          <p className="text-xl mb-8 text-primary-100">
-            Join thousands of students who are already learning on StudyNotion
+          <p className="text-xl mb-8 text-blue-100">
+            Join thousands of students already learning on StudyNotion
           </p>
-          <Link
-            to="/register"
-            className="bg-white text-primary-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
-          >
-            Get Started Today
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/courses"
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
+            >
+              Browse Courses
+            </Link>
+            {!user && (
+              <Link
+                to="/register"
+                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200"
+              >
+                Sign Up Free
+              </Link>
+            )}
+          </div>
         </div>
       </section>
     </div>

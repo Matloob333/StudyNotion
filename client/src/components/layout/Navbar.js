@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { Sun, Moon, Menu, X, User, LogOut, BookOpen, Heart, GraduationCap } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { Sun, Moon, Menu, X, User, LogOut, BookOpen, Heart, GraduationCap, Shield } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -92,6 +92,15 @@ const Navbar = () => {
                       <GraduationCap className="w-4 h-4" />
                       <span>Dashboard</span>
                     </Link>
+                    {user.accountType === 'Admin' && (
+                      <Link
+                        to="/admin-dashboard"
+                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
+                      >
+                        <Shield className="w-4 h-4" />
+                        <span>Admin Panel</span>
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left"
@@ -191,6 +200,15 @@ const Navbar = () => {
                       <GraduationCap className="w-4 h-4" />
                       <span>Dashboard</span>
                     </Link>
+                    {user.accountType === 'Admin' && (
+                      <Link
+                        to="/admin-dashboard"
+                        className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors mt-2"
+                      >
+                        <Shield className="w-4 h-4" />
+                        <span>Admin Panel</span>
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         handleLogout();

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
-import { Search, Filter, Grid, List, Star, Clock, TrendingUp, DollarSign } from 'lucide-react';
+import { Search, Filter, Grid, List } from 'lucide-react';
 import CourseCard from '../components/CourseCard';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,10 +18,14 @@ const Courses = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   // Fetch courses
-  const { data: courses = [], isLoading, error } = useQuery('courses', async () => {
+  const { data: coursesData = { courses: [] }, isLoading, error } = useQuery('courses', async () => {
     const response = await axios.get('/api/courses');
     return response.data;
   });
+
+  const courses = useMemo(() => {
+    return coursesData.courses || coursesData || [];
+  }, [coursesData]);
 
   // Fetch user's wishlist
   const { data: wishlist = [] } = useQuery(

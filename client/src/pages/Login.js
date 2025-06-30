@@ -24,7 +24,7 @@ const Login = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const result = await login(data);
+      const result = await login(data.email, data.password);
       if (result.success) {
         navigate(from, { replace: true });
       }
@@ -158,9 +158,12 @@ const Login = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors">
+                <Link
+                  to="/forgot-password"
+                  className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
+                >
                   Forgot your password?
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -206,6 +209,18 @@ const Login = () => {
                 />
               </div>
             </div>
+          </div>
+
+          <div className="text-center mt-6">
+            <p className="text-gray-600 dark:text-gray-400">
+              Don't have an account?{' '}
+              <Link
+                to="/register"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+              >
+                Sign up here
+              </Link>
+            </p>
           </div>
         </div>
       </div>
