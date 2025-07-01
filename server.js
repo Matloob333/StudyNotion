@@ -128,27 +128,10 @@ app.use('/api/admin', require('./routes/admin'));
 // Connect to MongoDB
 connectDB();
 
-// Handle React routing, return all requests to React app (AFTER API routes)
+// React catch-all route for production
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    const indexPath = path.join(__dirname, 'client/build', 'index.html');
-    console.log('Request for:', req.path, '-> Serving index.html from:', indexPath);
-    
-    // Check if file exists before sending
-    const fs = require('fs');
-    if (!fs.existsSync(indexPath)) {
-      console.error('index.html not found at:', indexPath);
-      return res.status(404).send('index.html not found');
-    }
-    
-    res.sendFile(indexPath, (err) => {
-      if (err) {
-        console.error('Error serving index.html:', err);
-        res.status(500).send('Error loading application');
-      } else {
-        console.log('Successfully served index.html');
-      }
-    });
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
   });
 }
 
