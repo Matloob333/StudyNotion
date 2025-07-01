@@ -53,38 +53,66 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/studynotion';
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('MongoDB Connected');
-  
-  // Load models after successful connection
-  const { User, Course, Category } = require('./models/index');
-  
-  console.log('Models loaded successfully:');
-  console.log('- User model:', typeof User.findOne);
-  console.log('- Course model:', typeof Course.find);
-  console.log('- Category model:', typeof Category.find);
-  
-  // Load routes only after successful connection
-  app.use('/api/health', require('./routes/health'));
-  app.use('/api/auth', require('./routes/auth'));
-  app.use('/api/courses', require('./routes/courses'));
-  app.use('/api/users', require('./routes/users'));
-  app.use('/api/categories', require('./routes/categories'));
-  app.use('/api/admin', require('./routes/admin'));
-})
-.catch(err => console.log('MongoDB Connection Error:', err));
-
-// Serve static files from the React app build directory
+// Serve static files from the React app build directory FIRST
 if (process.env.NODE_ENV === 'production') {
+  console.log('📁 Serving static files from client/build');
   app.use(express.static(path.join(__dirname, 'client/build')));
-  
-  // Handle React routing, return all requests to React app
+}
+
+// MongoDB Connection with retry logic
+const connectDB = async () => {
+  try {
+    const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/studynotion';
+    
+    console.log('🔗 Attempting to connect to MongoDB...');
+    console.log('📡 MongoDB URI:', MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')); // Hide credentials
+    
+    await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+      family: 4 // Use IPv4, skip trying IPv6
+    });
+    
+    console.log('✅ MongoDB Connected Successfully');
+    
+    // Load models after successful connection
+    const { User, Course, Category } = require('./models/index');
+    
+    console.log('📦 Models loaded successfully:');
+    console.log('- User model:', typeof User.findOne);
+    console.log('- Course model:', typeof Course.find);
+    console.log('- Category model:', typeof Category.find);
+    
+    // Load API routes only after successful connection
+    app.use('/api/health', require('./routes/health'));
+    app.use('/api/auth', require('./routes/auth'));
+    app.use('/api/courses', require('./routes/courses'));
+    app.use('/api/users', require('./routes/users'));
+    app.use('/api/categories', require('./routes/categories'));
+    app.use('/api/admin', require('./routes/admin'));
+    
+    console.log('🚀 All API routes loaded successfully');
+    
+  } catch (err) {
+    console.error('❌ MongoDB Connection Error:', err.message);
+    console.error('🔧 Troubleshooting tips:');
+    console.error('1. Check your MONGODB_URI environment variable');
+    console.error('2. Verify your MongoDB Atlas credentials');
+    console.error('3. Ensure your IP is whitelisted in MongoDB Atlas');
+    console.error('4. Check if your MongoDB cluster is running');
+    
+    // Don't exit the process, let it continue and serve the frontend
+    console.log('⚠️  Server will continue without database connection');
+  }
+};
+
+// Connect to MongoDB
+connectDB();
+
+// Handle React routing, return all requests to React app (AFTER API routes)
+if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
   });
@@ -92,5 +120,8 @@ if (process.env.NODE_ENV === 'production') {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🌐 Frontend: http://localhost:${PORT}`);
 }); 
