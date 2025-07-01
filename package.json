@@ -13,6 +13,7 @@
     "build-client": "cd client && npm run build",
     "heroku-postbuild": "npm run install-client && npm run build-client",
     "render-postbuild": "npm run install-client && npm run build-client",
+    "postinstall": "npm run install-client && npm run build-client",
     "seed": "node scripts/seed-courses.js",
     "add-videos": "node scripts/add-videos.js"
   },
