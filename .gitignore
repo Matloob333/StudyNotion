@@ -16,6 +16,11 @@ yarn.lock
 # ========================================
 # ENVIRONMENT VARIABLES
 # ========================================
+client/.env
+server/.env
+client/env.txt
+server/env.txt
+
 .env
 .env.local
 .env.development.local
