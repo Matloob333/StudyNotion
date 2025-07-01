@@ -13,8 +13,10 @@ services:
       ls -la client/
       echo "📁 Client public directory contents:"
       ls -la client/public/
+      echo "🔨 Installing client dependencies..."
+      cd client && npm install
       echo "🔨 Building client..."
-      cd client && npm install && npm run build
+      npm run build
       echo "✅ Build completed"
     startCommand: npm start
     envVars:
