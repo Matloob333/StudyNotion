@@ -422,8 +422,8 @@ router.post('/forgot-password', [
 
     // In a real application, you would send an email here
     // For development, we'll show the reset URL in the console and response
-    console.log('🔗 Password reset URL:', resetUrl);
-    console.log('📧 This would normally be sent via email to:', email);
+    console.log('Password reset URL:', resetUrl);
+    console.log('This would normally be sent via email to:', email);
 
     res.json({ 
       success: true, 

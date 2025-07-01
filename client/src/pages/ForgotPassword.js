@@ -28,7 +28,7 @@ const ForgotPassword = () => {
         
         // In development, show the reset URL
         if (response.data.resetUrl) {
-          console.log('🔗 Reset URL:', response.data.resetUrl);
+          console.log('Reset URL:', response.data.resetUrl);
           toast.success('Check the console for the reset URL (development mode)');
         }
       }

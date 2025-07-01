@@ -55,7 +55,6 @@ app.use(limiter);
 
 // Serve static files from the React app build directory FIRST
 if (process.env.NODE_ENV === 'production') {
-  console.log('📁 Serving static files from client/build');
   app.use(express.static(path.join(__dirname, 'client/build')));
 }
 
@@ -67,9 +66,6 @@ const connectDB = async () => {
   try {
     const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/studynotion';
     
-    console.log('🔗 Attempting to connect to MongoDB...');
-    console.log('📡 MongoDB URI:', MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')); // Hide credentials
-    
     await mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -78,32 +74,20 @@ const connectDB = async () => {
       family: 4 // Use IPv4, skip trying IPv6
     });
     
-    console.log('✅ MongoDB Connected Successfully');
+    console.log('MongoDB Connected Successfully');
     isMongoConnected = true;
     
     // Load models after successful connection
     const { User, Course, Category } = require('./models/index');
     
-    console.log('📦 Models loaded successfully:');
-    console.log('- User model:', typeof User.findOne);
-    console.log('- Course model:', typeof Course.find);
-    console.log('- Category model:', typeof Category.find);
-    
   } catch (err) {
-    console.error('❌ MongoDB Connection Error:', err.message);
-    console.error('🔧 Troubleshooting tips:');
-    console.error('1. Check your MONGODB_URI environment variable');
-    console.error('2. Verify your MongoDB Atlas credentials');
-    console.error('3. Ensure your IP is whitelisted in MongoDB Atlas');
-    console.error('4. Check if your MongoDB cluster is running');
-    
-    console.log('⚠️  Server will continue without database connection');
+    console.error('MongoDB Connection Error:', err.message);
+    console.log('Server will continue without database connection');
     isMongoConnected = false;
   }
 };
 
-// Load API routes (will work with or without MongoDB)
-console.log('🚀 Loading API routes...');
+// Load API routes
 app.use('/api/health', require('./routes/health'));
 
 // Add database status check endpoint
@@ -114,17 +98,12 @@ app.get('/api/db-status', (req, res) => {
   });
 });
 
-// Load other routes with error handling
-try {
-  app.use('/api/auth', require('./routes/auth'));
-  app.use('/api/courses', require('./routes/courses'));
-  app.use('/api/users', require('./routes/users'));
-  app.use('/api/categories', require('./routes/categories'));
-  app.use('/api/admin', require('./routes/admin'));
-  console.log('✅ All API routes loaded successfully');
-} catch (error) {
-  console.error('❌ Error loading some API routes:', error.message);
-}
+// Load other routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/courses', require('./routes/courses'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/categories', require('./routes/categories'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Connect to MongoDB
 connectDB();
@@ -138,9 +117,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🔗 DB Status: http://localhost:${PORT}/api/db-status`);
-  console.log(`🌐 Frontend: http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Frontend: http://localhost:3000`);
 }); 
