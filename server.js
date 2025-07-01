@@ -56,6 +56,7 @@ app.use(limiter);
 // Serve static files from the React app build directory FIRST
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client/build')));
+  console.log('Static files will be served from:', path.join(__dirname, 'client/build'));
 }
 
 // Global variable to track MongoDB connection status
@@ -111,7 +112,14 @@ connectDB();
 // Handle React routing, return all requests to React app (AFTER API routes)
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    const indexPath = path.join(__dirname, 'client/build', 'index.html');
+    console.log('Serving index.html from:', indexPath);
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error('Error serving index.html:', err);
+        res.status(500).send('Error loading application');
+      }
+    });
   });
 }
 

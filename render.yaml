@@ -6,13 +6,6 @@ services:
       echo "🚀 Starting build process..."
       npm install
       echo "📦 Root dependencies installed"
-      echo "📁 Current directory: $(pwd)"
-      echo "📁 Directory contents:"
-      ls -la
-      echo "📁 Client directory contents:"
-      ls -la client/
-      echo "📁 Client public directory contents:"
-      ls -la client/public/
       echo "🔨 Installing client dependencies..."
       cd client && npm install
       echo "🔨 Building client..."
@@ -31,4 +24,6 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: PORT
-        value: 5000 
+        value: 5000
+      - key: CORS_ORIGIN
+        value: https://studynotion-97v9.onrender.com 
