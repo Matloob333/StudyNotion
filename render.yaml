@@ -2,7 +2,20 @@ services:
   - type: web
     name: studynotion-backend
     env: node
-    buildCommand: npm run render-build
+    buildCommand: |
+      echo "🚀 Starting build process..."
+      npm install
+      echo "📦 Root dependencies installed"
+      echo "📁 Current directory: $(pwd)"
+      echo "📁 Directory contents:"
+      ls -la
+      echo "📁 Client directory contents:"
+      ls -la client/
+      echo "📁 Client public directory contents:"
+      ls -la client/public/
+      echo "🔨 Building client..."
+      cd client && npm install && npm run build
+      echo "✅ Build completed"
     startCommand: npm start
     envVars:
       - key: NODE_ENV
