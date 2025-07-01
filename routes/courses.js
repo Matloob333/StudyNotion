@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { Course, User } = require('../models/index');
 const auth = require('../middleware/auth');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
@@ -106,7 +107,34 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id)
+    const { id } = req.params;
+    
+    // Handle special cases
+    if (id === 'featured' || id === 'popular') {
+      // Return featured/popular courses instead of a single course
+      let query = {};
+      
+      if (id === 'featured') {
+        query = { isFeatured: true, isPublished: true };
+      } else if (id === 'popular') {
+        query = { isPublished: true };
+      }
+      
+      const courses = await Course.find(query)
+        .populate('instructor', 'name email profilePicture')
+        .populate('category', 'name')
+        .sort(id === 'popular' ? { averageRating: -1 } : { createdAt: -1 })
+        .limit(6);
+      
+      return res.json(courses);
+    }
+    
+    // Check if it's a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid course ID format' });
+    }
+    
+    const course = await Course.findById(id)
       .populate('instructor', 'name email profilePicture')
       .populate('category', 'name')
       .populate('reviews.user', 'name profilePicture')

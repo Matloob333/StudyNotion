@@ -59,6 +59,9 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client/build')));
 }
 
+// Global variable to track MongoDB connection status
+let isMongoConnected = false;
+
 // MongoDB Connection with retry logic
 const connectDB = async () => {
   try {
@@ -76,6 +79,7 @@ const connectDB = async () => {
     });
     
     console.log('✅ MongoDB Connected Successfully');
+    isMongoConnected = true;
     
     // Load models after successful connection
     const { User, Course, Category } = require('./models/index');
@@ -85,16 +89,6 @@ const connectDB = async () => {
     console.log('- Course model:', typeof Course.find);
     console.log('- Category model:', typeof Category.find);
     
-    // Load API routes only after successful connection
-    app.use('/api/health', require('./routes/health'));
-    app.use('/api/auth', require('./routes/auth'));
-    app.use('/api/courses', require('./routes/courses'));
-    app.use('/api/users', require('./routes/users'));
-    app.use('/api/categories', require('./routes/categories'));
-    app.use('/api/admin', require('./routes/admin'));
-    
-    console.log('🚀 All API routes loaded successfully');
-    
   } catch (err) {
     console.error('❌ MongoDB Connection Error:', err.message);
     console.error('🔧 Troubleshooting tips:');
@@ -103,10 +97,34 @@ const connectDB = async () => {
     console.error('3. Ensure your IP is whitelisted in MongoDB Atlas');
     console.error('4. Check if your MongoDB cluster is running');
     
-    // Don't exit the process, let it continue and serve the frontend
     console.log('⚠️  Server will continue without database connection');
+    isMongoConnected = false;
   }
 };
+
+// Load API routes (will work with or without MongoDB)
+console.log('🚀 Loading API routes...');
+app.use('/api/health', require('./routes/health'));
+
+// Add database status check endpoint
+app.get('/api/db-status', (req, res) => {
+  res.json({ 
+    connected: isMongoConnected, 
+    message: isMongoConnected ? 'Database connected' : 'Database not connected'
+  });
+});
+
+// Load other routes with error handling
+try {
+  app.use('/api/auth', require('./routes/auth'));
+  app.use('/api/courses', require('./routes/courses'));
+  app.use('/api/users', require('./routes/users'));
+  app.use('/api/categories', require('./routes/categories'));
+  app.use('/api/admin', require('./routes/admin'));
+  console.log('✅ All API routes loaded successfully');
+} catch (error) {
+  console.error('❌ Error loading some API routes:', error.message);
+}
 
 // Connect to MongoDB
 connectDB();
@@ -123,5 +141,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🔗 DB Status: http://localhost:${PORT}/api/db-status`);
   console.log(`🌐 Frontend: http://localhost:${PORT}`);
 }); 
