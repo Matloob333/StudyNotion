@@ -14,6 +14,7 @@
     "heroku-postbuild": "npm run install-client && npm run build-client",
     "render-postbuild": "npm run install-client && npm run build-client",
     "postinstall": "npm run install-client && npm run build-client",
+    "render-build": "node test-build.js && npm install && cd client && npm install && npm run build",
     "seed": "node scripts/seed-courses.js",
     "add-videos": "node scripts/add-videos.js"
   },
