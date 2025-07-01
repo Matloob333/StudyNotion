@@ -53,10 +53,20 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Serve static files from the React app build directory FIRST
+// Serve static files from the React app build directory FIRST (before API routes)
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'client/build')));
-  console.log('Static files will be served from:', path.join(__dirname, 'client/build'));
+  const staticPath = path.join(__dirname, 'client/build');
+  app.use(express.static(staticPath));
+  console.log('Static files will be served from:', staticPath);
+  
+  // Add a test endpoint to verify static files are accessible
+  app.get('/test-static', (req, res) => {
+    res.json({ 
+      message: 'Static files are accessible',
+      staticPath: staticPath,
+      files: require('fs').readdirSync(staticPath)
+    });
+  });
 }
 
 // Global variable to track MongoDB connection status
@@ -91,6 +101,15 @@ const connectDB = async () => {
 // Load API routes
 app.use('/api/health', require('./routes/health'));
 
+// Simple health check for the root API
+app.get('/api', (req, res) => {
+  res.json({ 
+    message: 'StudyNotion API is running',
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Add database status check endpoint
 app.get('/api/db-status', (req, res) => {
   res.json({ 
@@ -113,11 +132,21 @@ connectDB();
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
     const indexPath = path.join(__dirname, 'client/build', 'index.html');
-    console.log('Serving index.html from:', indexPath);
+    console.log('Request for:', req.path, '-> Serving index.html from:', indexPath);
+    
+    // Check if file exists before sending
+    const fs = require('fs');
+    if (!fs.existsSync(indexPath)) {
+      console.error('index.html not found at:', indexPath);
+      return res.status(404).send('index.html not found');
+    }
+    
     res.sendFile(indexPath, (err) => {
       if (err) {
         console.error('Error serving index.html:', err);
         res.status(500).send('Error loading application');
+      } else {
+        console.log('Successfully served index.html');
       }
     });
   });
